@@ -1,24 +1,38 @@
 const fs = require('fs');
 const path = require('path');
 
-function getConfigFilePath(guildId) {
-    return path.join(__dirname, '../../data', `${guildId}-config.json`);
-}
-
 function getThreadsFilePath(guildId) {
     return path.join(__dirname, '../../data', `${guildId}-threads.json`);
 }
 
-async function saveHuntConfig(guildId, config) {
-    const filePath = getConfigFilePath(guildId);
-    fs.writeFileSync(filePath, JSON.stringify(config, null, 4));
+function getHuntFilePath() {
+    return path.join(__dirname, '../../data', 'hunts.json');
 }
 
-async function loadHuntConfig(guildId) {
-    const filePath = getConfigFilePath(guildId);
-    if (!fs.existsSync(filePath)) return null;
-    const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
+function loadHunts() {
+    const filePath = getHuntFilePath();
+    return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath)) : {};
+}
+
+function saveHunts(state) {
+    const filePath = getHuntFilePath();
+    fs.writeFileSync(filePath, JSON.stringify(state, null, 4));
+}
+
+const hunts = loadHunts();
+
+function createHunt(channelId, huntConfig) {
+    hunts[channelId] = { ...huntConfig, createdAt: new Date().toISOString() };
+    saveHunts(hunts);
+}
+
+function getHunt(channelId) {
+    return hunts[channelId];
+}
+
+function resetHunt(channelId) {
+    delete hunts[channelId];
+    saveHunts(hunts);
 }
 
 async function saveHuntThreads(guildId, threadsData) {
@@ -34,8 +48,9 @@ async function loadHuntThreads(guildId) {
 }
 
 module.exports = {
-    saveHuntConfig,
-    loadHuntConfig,
     saveHuntThreads,
     loadHuntThreads,
+    createHunt,
+    getHunt,
+    resetHunt,
 };

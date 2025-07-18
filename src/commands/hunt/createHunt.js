@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getPublicSheetData, extractSpreadsheetIdFromUrl } = require('../../services/googleSheetsService');
-const { saveHuntConfig, saveHuntThreads } = require('../../services/huntData');
+const { createHunt, saveHuntThreads } = require('../../services/huntData');
 const { scheduleHintsForThread } = require('../../services/scheduler');
 
 module.exports = {
@@ -38,16 +38,14 @@ module.exports = {
             const spreadsheetId = extractSpreadsheetIdFromUrl(sheetUrl);
             const sheetData = await getPublicSheetData(spreadsheetId);
 
-            const huntConfig = {
+            // Save hunt config per channel
+            createHunt(interaction.channel.id, {
                 sheetUrl,
                 hints,
                 seconds,
                 goal,
                 sheetData,
-                createdAt: Date.now(),
-            };
-
-            await saveHuntConfig(interaction.guild.id, huntConfig);
+            });
 
             const guildHuntData = {
                 threads: [],
