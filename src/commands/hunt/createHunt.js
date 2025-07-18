@@ -1,22 +1,58 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { createHunt } = require('../../services/huntService');
+const { loadSheetData } = require('../../utils/googleSheets');
+const { saveHuntConfig } = require('../../utils/huntData');
+const path = require('path');
+const fs = require('fs');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('createhunt')
-        .setDescription('Start a scavenger hunt in this channel')
-        .addStringOption(option => option.setName('sheet').setDescription('Google Sheet URL').setRequired(true))
-        .addIntegerOption(option => option.setName('hints').setDescription('Hints per set').setRequired(true))
-        .addIntegerOption(option => option.setName('seconds').setDescription('Seconds between hints').setRequired(true))
-        .addIntegerOption(option => option.setName('goal').setDescription('Server goal').setRequired(true)),
+        .setDescription('Create a new scavenger hunt')
+        .addStringOption(option =>
+            option.setName('sheetUrl')
+                .setDescription('Google Sheet URL')
+                .setRequired(true))
+        .addIntegerOption(option =>
+            option.setName('hints')
+                .setDescription('Number of hints')
+                .setRequired(true))
+        .addIntegerOption(option =>
+            option.setName('seconds')
+                .setDescription('Seconds between hints')
+                .setRequired(true))
+        .addIntegerOption(option =>
+            option.setName('goal')
+                .setDescription('Server points goal')
+                .setRequired(true)),
+
     async execute(interaction) {
-        const channelId = interaction.channel.id;
-        const sheetUrl = interaction.options.getString('sheet');
+        if (interaction.user.username !== 'Kim') {
+            return interaction.reply({ content: 'Only Kim can run this command.', ephemeral: true });
+        }
+
+        const sheetUrl = interaction.options.getString('sheetUrl');
         const hints = interaction.options.getInteger('hints');
         const seconds = interaction.options.getInteger('seconds');
         const goal = interaction.options.getInteger('goal');
 
-        createHunt(channelId, { sheetUrl, hints, seconds, goal });
-        await interaction.reply('Hunt created for this channel!');
+        try {
+            const sheetData = await loadSheetData(sheetUrl);
+            const huntConfig = {
+                sheetUrl,
+                hints,
+                seconds,
+                goal,
+                sheetData,
+                createdAt: Date.now(),
+            };
+
+            await saveHuntConfig(interaction.guild.id, huntConfig);
+
+            await interaction.reply(`Hunt created. Hints every ${seconds} seconds. Server goal: ${goal} points.`);
+
+        } catch (error) {
+            console.error(error);
+            await interaction.reply({ content: 'Failed to create hunt. Please check the sheet URL.', ephemeral: true });
+        }
     },
 };
