@@ -7,15 +7,9 @@
   {
     "token": "discord bot token",
     "clientId": "discord app id",
-    "sheet": "google sheet url -- must be viewable publicly"
+    "guildId": "server id"
   }
   ```
 
 3. add the bot to the server
 `https://discord.com/oauth2/authorize?client_id=<clientid>`
-
-## user commands
-
-`/done <week #> <kaya_id>` report by user that they found a climb for a week
-
-`/scoreboard` displays the scoreboard
