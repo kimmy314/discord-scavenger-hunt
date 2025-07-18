@@ -52,12 +52,12 @@ module.exports = {
             };
 
             for (const row of sheetData) {
-                const week = row['Week #'];
+                const set = row['Set #'];
                 const gym = row['Gym'];
                 const kayaId = row['Kaya Id'];
                 const startDate = row['Start Date'];
 
-                const threadName = `Set: ${week} - ${gym}`;
+                const threadName = `Set: ${set} - ${gym}`;
                 const thread = await interaction.channel.threads.create({
                     name: threadName,
                     autoArchiveDuration: 1440,
@@ -67,7 +67,7 @@ module.exports = {
                 await scheduleHintsForThread({
                     thread,
                     spreadsheetId,
-                    week,
+                    set,
                     gym,
                     secondsBetweenHints: seconds,
                     totalHints: hints,
@@ -76,7 +76,7 @@ module.exports = {
 
                 guildHuntData.threads.push({
                     threadId: thread.id,
-                    week,
+                    set,
                     gym,
                     kayaId,
                     startDate,

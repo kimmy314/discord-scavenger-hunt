@@ -1,7 +1,7 @@
 async function scheduleHintsForThread({
     thread,
     spreadsheetId,
-    week,
+    set,
     gym,
     secondsBetweenHints,
     totalHints,
@@ -9,7 +9,7 @@ async function scheduleHintsForThread({
 }) {
     const timeouts = [];
     const sheetData = await getSheetData(spreadsheetId);
-    const row = sheetData.find(r => r['Week #'] === week && r['Gym'] === gym);
+    const row = sheetData.find(r => r['Set #'] === set && r['Gym'] === gym);
     if (!row) return;
 
     const startTime = new Date(row['Start Date']).getTime();
@@ -20,7 +20,7 @@ async function scheduleHintsForThread({
 
         const timeout = setTimeout(async () => {
             const latestSheet = await getSheetData(spreadsheetId);
-            const latestRow = latestSheet.find(r => r['Week #'] === week && r['Gym'] === gym);
+            const latestRow = latestSheet.find(r => r['Set #'] === set && r['Gym'] === gym);
             if (!latestRow) return;
 
             const hintUrl = latestRow[`Hint ${i + 1}`];

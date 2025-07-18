@@ -42,9 +42,17 @@ async function saveHuntThreads(guildId, threadsData) {
 
 async function loadHuntThreads(guildId) {
     const filePath = getThreadsFilePath(guildId);
-    if (!fs.existsSync(filePath)) return null;
+    if (!fs.existsSync(filePath)) {
+        return { threads: [], submissions: {}, serverPointsAwardedForSet: [] };
+    }
     const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+
+    // Ensure missing fields are always initialized
+    if (!parsed.submissions) parsed.submissions = {};
+    if (!parsed.serverPointsAwardedForSet) parsed.serverPointsAwardedForSet = [];
+
+    return parsed;
 }
 
 module.exports = {
