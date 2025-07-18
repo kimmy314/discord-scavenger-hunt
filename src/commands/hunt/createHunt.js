@@ -1,12 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { loadSheetData } = require('../../utils/googleSheets');
+const { getPublicSheetData, extractSpreadsheetIdFromUrl } = require('../../services/googleSheetsService');
 const { saveHuntConfig } = require('../../utils/huntData');
-const path = require('path');
-const fs = require('fs');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('createhunt')
+        .setName('createHunt')
         .setDescription('Create a new scavenger hunt')
         .addStringOption(option =>
             option.setName('sheetUrl')
@@ -36,7 +34,9 @@ module.exports = {
         const goal = interaction.options.getInteger('goal');
 
         try {
-            const sheetData = await loadSheetData(sheetUrl);
+            const spreadsheetId = extractSpreadsheetIdFromUrl(sheetUrl);
+            const sheetData = await getPublicSheetData(spreadsheetId);
+
             const huntConfig = {
                 sheetUrl,
                 hints,
@@ -49,7 +49,6 @@ module.exports = {
             await saveHuntConfig(interaction.guild.id, huntConfig);
 
             await interaction.reply(`Hunt created. Hints every ${seconds} seconds. Server goal: ${goal} points.`);
-
         } catch (error) {
             console.error(error);
             await interaction.reply({ content: 'Failed to create hunt. Please check the sheet URL.', ephemeral: true });
