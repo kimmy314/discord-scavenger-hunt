@@ -24,7 +24,7 @@ module.exports = {
                 .setDescription('Set number')
                 .setRequired(true))
         .addStringOption(option =>
-            option.setName('kayaId')
+            option.setName('kaya_id')
                 .setDescription('Kaya ID or full URL')
                 .setRequired(true)),
 
@@ -33,7 +33,7 @@ module.exports = {
         const guildId = interaction.guild.id;
         const userId = interaction.user.id;
         const setNumber = interaction.options.getInteger('set');
-        const kayaIdInput = interaction.options.getString('kayaId');
+        const kayaIdInput = interaction.options.getString('kaya_id');
         const kayaId = extractKayaId(kayaIdInput);
 
         const huntConfig = getHunt(channelId);

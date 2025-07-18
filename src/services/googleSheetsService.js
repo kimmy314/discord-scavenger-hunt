@@ -1,5 +1,6 @@
-const fetch = require('node-fetch');
 const { parse } = require('csv-parse/sync');
+
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 function extractSpreadsheetIdFromUrl(url) {
     try {

@@ -3,12 +3,14 @@ const { getPublicSheetData, extractSpreadsheetIdFromUrl } = require('../../servi
 const { createHunt, saveHuntThreads } = require('../../services/huntData');
 const { scheduleHintsForThread } = require('../../services/scheduler');
 
+const ADMIN_USER_ID = '114440671066193929';
+
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('createHunt')
+        .setName('create_hunt')
         .setDescription('Create a new scavenger hunt')
         .addStringOption(option =>
-            option.setName('sheetUrl')
+            option.setName('sheet_url')
                 .setDescription('Google Sheet URL')
                 .setRequired(true))
         .addIntegerOption(option =>
@@ -25,11 +27,11 @@ module.exports = {
                 .setRequired(true)),
 
     async execute(interaction) {
-        if (interaction.user.username !== 'Kim') {
+        if (interaction.user.id !== ADMIN_USER_ID) {
             return interaction.reply({ content: 'Only Kim can run this command.', ephemeral: true });
         }
 
-        const sheetUrl = interaction.options.getString('sheetUrl');
+        const sheetUrl = interaction.options.getString('sheet_url');
         const hints = interaction.options.getInteger('hints');
         const seconds = interaction.options.getInteger('seconds');
         const goal = interaction.options.getInteger('goal');
@@ -38,7 +40,6 @@ module.exports = {
             const spreadsheetId = extractSpreadsheetIdFromUrl(sheetUrl);
             const sheetData = await getPublicSheetData(spreadsheetId);
 
-            // Save hunt config per channel
             createHunt(interaction.channel.id, {
                 sheetUrl,
                 hints,
@@ -49,6 +50,8 @@ module.exports = {
 
             const guildHuntData = {
                 threads: [],
+                submissions: {},
+                serverPointsAwardedForSet: [],
             };
 
             for (const row of sheetData) {
@@ -80,6 +83,7 @@ module.exports = {
                     gym,
                     kayaId,
                     startDate,
+                    hintsGiven: 0,
                 });
             }
 
