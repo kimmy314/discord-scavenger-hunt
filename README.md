@@ -11,9 +11,10 @@ A Discord bot to run a scavenger hunt game with climbing gyms, using Google Shee
 - Points awarded decrease as more hints are given.
 - Admin-only controls for creating and resetting hunts.
 - Leaderboard with `/rank`.
+- Automatically resumes scheduled hints on bot restart.
+- Google Sheets is always read live at hint time (no stored sheet cache).
 
 ---
-
 
 ## 🚀 Getting Started
 
@@ -84,6 +85,7 @@ node index.js
 |-----------|-----------------------------|
 | `/found`  | Submit a find (set # + kaya) |
 | `/rank`   | View leaderboard             |
+| `/ping`   | Simple health check for the bot|
 
 ---
 
@@ -94,6 +96,9 @@ node index.js
 Set # | Start Date | Gym | Kaya Id | Hint 1 | Hint 2 | ...
 ```
 
+- `Start Date` must be formatted `M/D/YYYY HH:mm:ss` (e.g., `7/18/2025 16:53:00`) and is interpreted as San Francisco time.
 - Sheet must be **publicly viewable** as CSV.
+
+- On restart, the bot automatically re-schedules future hints and immediately posts any missed ones.
 
 ---

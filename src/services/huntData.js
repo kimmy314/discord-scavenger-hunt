@@ -9,9 +9,17 @@ function getHuntFilePath() {
     return path.join(__dirname, '../../data', 'hunts.json');
 }
 
-function loadHunts() {
+function ensureHuntFileExists() {
     const filePath = getHuntFilePath();
-    return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath)) : {};
+    if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, JSON.stringify({}, null, 4));
+    }
+}
+
+function loadHunts() {
+    ensureHuntFileExists();
+    const filePath = getHuntFilePath();
+    return JSON.parse(fs.readFileSync(filePath));
 }
 
 function saveHunts(state) {
@@ -19,6 +27,7 @@ function saveHunts(state) {
     fs.writeFileSync(filePath, JSON.stringify(state, null, 4));
 }
 
+ensureHuntFileExists();
 const hunts = loadHunts();
 
 function createHunt(channelId, huntConfig) {
@@ -48,7 +57,6 @@ async function loadHuntThreads(guildId) {
     const data = fs.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(data);
 
-    // Ensure missing fields are always initialized
     if (!parsed.submissions) parsed.submissions = {};
     if (!parsed.serverPointsAwardedForSet) parsed.serverPointsAwardedForSet = [];
 

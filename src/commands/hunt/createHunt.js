@@ -31,6 +31,8 @@ module.exports = {
             return interaction.reply({ content: 'Only Kim can run this command.', ephemeral: true });
         }
 
+        await interaction.deferReply({ ephemeral: true });
+
         const sheetUrl = interaction.options.getString('sheet_url');
         const hints = interaction.options.getInteger('hints');
         const seconds = interaction.options.getInteger('seconds');
@@ -45,7 +47,6 @@ module.exports = {
                 hints,
                 seconds,
                 goal,
-                sheetData,
             });
 
             const guildHuntData = {
@@ -89,10 +90,10 @@ module.exports = {
 
             await saveHuntThreads(interaction.guild.id, guildHuntData);
 
-            await interaction.reply(`Hunt created. Threads created. Hints every ${seconds} seconds. Server goal: ${goal} points.`);
+            await interaction.editReply(`Hunt created. Threads created. Hints every ${seconds} seconds. Server goal: ${goal} points.`);
         } catch (error) {
             console.error(error);
-            await interaction.reply({ content: 'Failed to create hunt. Please check the sheet URL.', ephemeral: true });
+            await interaction.editReply({ content: 'Failed to create hunt. Please check the sheet URL.' });
         }
     },
 };
