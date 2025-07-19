@@ -75,7 +75,7 @@ module.exports = {
             addServerPoints(guildId, channelId, serverPoints);
             threadsFile.serverPointsAwardedForSet.push(String(setNumber));
 
-            serverPointsMessage = `Server earned ${serverPoints} points for this set. (first to find)`;
+            serverPointsMessage = `Server earned ${serverPoints} points for this set. (Found with ${hintsGiven} hints given)`;
         } else {
             serverPointsMessage = `Server already earned points for this set.`;
         }

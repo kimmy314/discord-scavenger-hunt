@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { getAllUserPoints } = require('../../services/pointsService');
+const { getAllUserPoints, getServerPoints } = require('../../services/pointsService');
+const { getHunt } = require('../../services/huntData');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -8,6 +9,10 @@ module.exports = {
 
     async execute(interaction) {
         const guildId = interaction.guild.id;
+
+        // If running inside a thread, use parentId for points lookup
+        const channelId = interaction.channel.isThread() ? interaction.channel.parentId : interaction.channel.id;
+
         const userPoints = getAllUserPoints(guildId);
 
         if (!userPoints || Object.keys(userPoints).length === 0) {
@@ -23,8 +28,15 @@ module.exports = {
             return `#${index + 1}: ${displayName} — ${points.toFixed(1)} points`;
         }));
 
+        const serverPoints = getServerPoints(guildId, channelId);
+        const huntConfig = getHunt(channelId);
+        const serverGoal = huntConfig?.goal || 0;
+
         await interaction.reply({
-            content: `🏆 **Leaderboard** 🏆\n\n${leaderboard.join('\n')}`,
+            content:
+                `📊 **Server Points:** ${serverPoints} / ${serverGoal} Goal\n\n` +
+                `🏆 **Leaderboard** 🏆\n\n` +
+                `${leaderboard.join('\n')}`,
             ephemeral: false,
         });
     },

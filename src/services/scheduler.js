@@ -44,9 +44,13 @@ async function scheduleHintsForThread({
             if (hintUrl) {
                 await thread.send(`Hint ${i + 1}: ${hintUrl}`);
 
-                if (targetThread) {
-                    targetThread.hintsGiven = (targetThread.hintsGiven || 0) + 1;
-                    await saveHuntThreads(guildId, threadsFile);
+                // 🔥 Reload fresh before saving
+                const latestThreadsFile = await loadHuntThreads(guildId);
+                const latestTargetThread = latestThreadsFile.threads.find(t => t.set == set && t.gym == gym);
+
+                if (latestTargetThread) {
+                    latestTargetThread.hintsGiven = (latestTargetThread.hintsGiven || 0) + 1;
+                    await saveHuntThreads(guildId, latestThreadsFile);
                 }
             }
 
