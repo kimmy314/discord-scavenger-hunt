@@ -1,4 +1,5 @@
 const { DateTime } = require('luxon');
+const { loadHuntThreads, saveHuntThreads } = require('./huntData');
 
 async function scheduleHintsForThread({
     thread,
@@ -25,6 +26,10 @@ async function scheduleHintsForThread({
 
     console.log('Parsed start time (San Francisco time):', new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
 
+    const guildId = thread.guild.id;
+    const threadsFile = await loadHuntThreads(guildId);
+    const targetThread = threadsFile.threads.find(t => t.set == set && t.gym == gym);
+
     for (let i = 0; i < totalHints; i++) {
         const scheduledTime = startTime + i * secondsBetweenHints * 1000;
         const delay = scheduledTime - Date.now();
@@ -37,6 +42,11 @@ async function scheduleHintsForThread({
             const hintUrl = latestRow[`Hint ${i + 1}`];
             if (hintUrl) {
                 await thread.send(`Hint ${i + 1}: ${hintUrl}`);
+
+                if (targetThread) {
+                    targetThread.hintsGiven = (targetThread.hintsGiven || 0) + 1;
+                    await saveHuntThreads(guildId, threadsFile);
+                }
             }
         };
 

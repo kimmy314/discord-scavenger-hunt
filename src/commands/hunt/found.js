@@ -29,7 +29,7 @@ module.exports = {
                 .setRequired(true)),
 
     async execute(interaction) {
-        const channelId = interaction.channel.id;
+        const channelId = interaction.channel.isThread() ? interaction.channel.parentId : interaction.channel.id;
         const guildId = interaction.guild.id;
         const userId = interaction.user.id;
         const setNumber = interaction.options.getInteger('set');
@@ -67,7 +67,7 @@ module.exports = {
         if (!threadsFile.serverPointsAwardedForSet.includes(String(setNumber))) {
             const relatedThreads = threadsFile.threads.filter(t => t.set == setNumber);
             const hintsGiven = Math.max(...relatedThreads.map(t => t.hintsGiven || 0));
-            const serverPoints = huntConfig.hints + 1 - hintsGiven;
+            const serverPoints = Math.max(huntConfig.hints - (hintsGiven - 1), 1);
 
             addServerPoints(guildId, channelId, serverPoints);
             threadsFile.serverPointsAwardedForSet.push(String(setNumber));
