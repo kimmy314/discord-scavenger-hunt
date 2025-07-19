@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const { getPublicSheetData, extractSpreadsheetIdFromUrl } = require('../../services/googleSheetsService');
 const { createHunt, saveHuntThreads } = require('../../services/huntData');
 const { scheduleHintsForThread } = require('../../services/scheduler');
+const { DateTime } = require('luxon');
 
 const ADMIN_USER_ID = '114440671066193929';
 
@@ -61,12 +62,17 @@ module.exports = {
                 const kayaId = row['Kaya Id'];
                 const startDate = row['Start Date'];
 
+                const startDateTime = DateTime.fromFormat(startDate.trim(), 'M/d/yyyy HH:mm:ss', { zone: 'America/Los_Angeles' });
+                const firstHintTimestamp = Math.floor(startDateTime.toMillis() / 1000);
+
                 const threadName = `Set: ${set} - ${gym}`;
                 const thread = await interaction.channel.threads.create({
                     name: threadName,
                     autoArchiveDuration: 1440,
                     reason: 'Scavenger hunt thread',
                 });
+
+                await thread.send(`First hint will be released <t:${firstHintTimestamp}:t>`);
 
                 await scheduleHintsForThread({
                     thread,

@@ -29,8 +29,9 @@ async function scheduleHintsForThread({
     const guildId = thread.guild.id;
     const threadsFile = await loadHuntThreads(guildId);
     const targetThread = threadsFile.threads.find(t => t.set == set && t.gym == gym);
+    const alreadyGiven = targetThread?.hintsGiven || 0;
 
-    for (let i = 0; i < totalHints; i++) {
+    for (let i = alreadyGiven; i < totalHints; i++) {
         const scheduledTime = startTime + i * secondsBetweenHints * 1000;
         const delay = scheduledTime - Date.now();
 
@@ -47,6 +48,11 @@ async function scheduleHintsForThread({
                     targetThread.hintsGiven = (targetThread.hintsGiven || 0) + 1;
                     await saveHuntThreads(guildId, threadsFile);
                 }
+            }
+
+            if (i + 1 < totalHints) {
+                const nextHintTimestamp = Math.floor((scheduledTime + secondsBetweenHints * 1000) / 1000);
+                await thread.send(`Next hint will be released <t:${nextHintTimestamp}:t>`);
             }
         };
 

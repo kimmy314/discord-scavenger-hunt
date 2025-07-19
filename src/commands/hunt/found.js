@@ -46,11 +46,12 @@ module.exports = {
             return interaction.reply({ content: 'Hunt threads data missing.', ephemeral: true });
         }
 
-        const foundThread = threadsFile.threads.find(t => t.set == setNumber && t.kayaId == kayaId);
-        if (!foundThread) {
+        const foundThreadData = threadsFile.threads.find(t => t.set == setNumber && t.kayaId == kayaId);
+        if (!foundThreadData) {
             return interaction.reply({ content: 'Invalid set number or Kaya ID for this hunt.', ephemeral: true });
         }
 
+        const thread = await interaction.guild.channels.fetch(foundThreadData.threadId);
         if (!threadsFile.submissions[setNumber]) {
             threadsFile.submissions[setNumber] = [];
         }
@@ -63,14 +64,20 @@ module.exports = {
         const userPoints = Math.max(3 - countForThisSet * 0.1, 1);
         addUserPoints(guildId, userId, userPoints);
 
-        // Only award server points if this set hasn't scored yet
+        let serverPoints = 0;
+        let serverPointsMessage = '';
+
         if (!threadsFile.serverPointsAwardedForSet.includes(String(setNumber))) {
             const relatedThreads = threadsFile.threads.filter(t => t.set == setNumber);
             const hintsGiven = Math.max(...relatedThreads.map(t => t.hintsGiven || 0));
-            const serverPoints = Math.max(huntConfig.hints - (hintsGiven - 1), 1);
+            serverPoints = Math.max(huntConfig.hints - (hintsGiven - 1), 1);
 
             addServerPoints(guildId, channelId, serverPoints);
             threadsFile.serverPointsAwardedForSet.push(String(setNumber));
+
+            serverPointsMessage = `Server earned ${serverPoints} points for this set. (first to find)`;
+        } else {
+            serverPointsMessage = `Server already earned points for this set.`;
         }
 
         threadsFile.submissions[setNumber].push(userId);
@@ -80,5 +87,8 @@ module.exports = {
             content: `✅ Found recorded! You earned ${userPoints} points.\nTotal: ${getUserPoints(guildId, userId)} points.`,
             ephemeral: true,
         });
+
+        const displayName = interaction.member.displayName;
+        await thread.send(`${displayName} earned ${userPoints.toFixed(1)} points for themselves.\n${serverPointsMessage}`);
     },
 };
