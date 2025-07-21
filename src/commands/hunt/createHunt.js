@@ -24,7 +24,7 @@ module.exports = {
                 .setRequired(true))
         .addIntegerOption(option =>
             option.setName('goal')
-                .setDescription('Server points goal')
+                .setDescription('Channel points goal')
                 .setRequired(true)),
 
     async execute(interaction) {
@@ -53,7 +53,7 @@ module.exports = {
             const guildHuntData = {
                 threads: [],
                 submissions: {},
-                serverPointsAwardedForSet: [],
+                channelPointsAwardedForSet: [],
             };
 
             for (const row of sheetData) {
@@ -96,7 +96,7 @@ module.exports = {
 
             await saveHuntThreads(interaction.guild.id, guildHuntData);
 
-            await interaction.editReply(`Hunt created. Threads created. Hints every ${seconds} seconds. Server goal: ${goal} points.`);
+            await interaction.editReply(`Hunt created. Threads created. Hints every ${seconds} seconds. Channel goal: ${goal} points.`);
         } catch (error) {
             console.error(error);
             await interaction.editReply({ content: 'Failed to create hunt. Please check the sheet URL.' });

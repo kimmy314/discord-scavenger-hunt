@@ -1,12 +1,12 @@
 # 🧗 Discord Scavenger Hunt Bot
 
-A Discord bot to run a scavenger hunt game with climbing gyms, using Google Sheets as the source of data. Hints are released on a schedule, users report found climbs, and points are tracked per user and server.
+A Discord bot to run a scavenger hunt game with climbing gyms, using Google Sheets as the source of data. Hints are released on a schedule, users report found climbs, and points are tracked per user and channel.
 
 ---
 
 ## 📋 Features
 - Scheduled hint releases pulled from a Google Sheet.
-- Tracks user and server points.
+- Tracks user and channel points.
 - Supports multiple gyms per set.
 - Points awarded decrease as more hints are given.
 - Admin-only controls for creating and resetting hunts.

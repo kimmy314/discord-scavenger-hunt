@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getHunt, loadHuntThreads } = require('../../services/huntData');
-const { getServerPoints } = require('../../services/pointsService');
+const { getChannelPoints } = require('../../services/pointsService');
 
 const ADMIN_USER_ID = '114440671066193929';
 
@@ -19,7 +19,7 @@ module.exports = {
 
         const huntConfig = getHunt(channelId);
         const threadsFile = await loadHuntThreads(guildId);
-        const serverPoints = getServerPoints(guildId, channelId);
+        const channelPoints = getChannelPoints(guildId, channelId);
 
         if (!huntConfig) {
             return interaction.reply('No active hunt for this channel.');
@@ -32,8 +32,8 @@ module.exports = {
         await interaction.reply({
             content:
                 `📋 **Hunt Status for this Channel** 📋\n\n` +
-                `Server Goal: ${huntConfig.goal} points\n` +
-                `Current Server Points: ${serverPoints}\n` +
+                `Channel Goal: ${huntConfig.goal} points\n` +
+                `Current Channel Points: ${channelPoints}\n` +
                 `\n${setsInfo.join('\n')}`,
             ephemeral: true,
         });

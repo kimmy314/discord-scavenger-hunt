@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { getAllUserPoints, getServerPoints } = require('../../services/pointsService');
+const { getAllUserPoints, getChannelPoints } = require('../../services/pointsService');
 const { getHunt } = require('../../services/huntData');
 
 module.exports = {
@@ -28,13 +28,13 @@ module.exports = {
             return `#${index + 1}: ${displayName} — ${points.toFixed(1)} points`;
         }));
 
-        const serverPoints = getServerPoints(guildId, channelId);
+        const channelPoints = getChannelPoints(guildId, channelId);
         const huntConfig = getHunt(channelId);
-        const serverGoal = huntConfig?.goal || 0;
+        const channelGoal = huntConfig?.goal || 0;
 
         await interaction.reply({
             content:
-                `📊 **Server Points:** ${serverPoints} / ${serverGoal} Goal\n\n` +
+                `📊 **Channel Points:** ${channelPoints} / ${channelGoal} Goal\n\n` +
                 `🏆 **Leaderboard** 🏆\n\n` +
                 `${leaderboard.join('\n')}`,
             ephemeral: false,

@@ -52,13 +52,13 @@ async function saveHuntThreads(guildId, threadsData) {
 async function loadHuntThreads(guildId) {
     const filePath = getThreadsFilePath(guildId);
     if (!fs.existsSync(filePath)) {
-        return { threads: [], submissions: {}, serverPointsAwardedForSet: [] };
+        return { threads: [], submissions: {}, channelPointsAwardedForSet: [] };
     }
     const data = fs.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(data);
 
     if (!parsed.submissions) parsed.submissions = {};
-    if (!parsed.serverPointsAwardedForSet) parsed.serverPointsAwardedForSet = [];
+    if (!parsed.channelPointsAwardedForSet) parsed.channelPointsAwardedForSet = [];
 
     return parsed;
 }

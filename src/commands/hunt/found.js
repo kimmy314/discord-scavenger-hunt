@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const { getHunt, saveHuntThreads, loadHuntThreads } = require('../../services/huntData');
 const {
     addUserPoints,
-    addServerPoints,
+    addChannelPoints,
     getUserPoints,
 } = require('../../services/pointsService');
 
@@ -64,20 +64,20 @@ module.exports = {
         const userPoints = Math.max(3 - countForThisSet * 0.1, 1);
         addUserPoints(guildId, userId, userPoints);
 
-        let serverPoints = 0;
-        let serverPointsMessage = '';
+        let channelPoints = 0;
+        let channelPointsMessage = '';
 
-        if (!threadsFile.serverPointsAwardedForSet.includes(String(setNumber))) {
+        if (!threadsFile.channelPointsAwardedForSet.includes(String(setNumber))) {
             const relatedThreads = threadsFile.threads.filter(t => t.set == setNumber);
             const hintsGiven = Math.max(...relatedThreads.map(t => t.hintsGiven || 0));
-            serverPoints = Math.max(huntConfig.hints - (hintsGiven - 1), 1);
+            channelPoints = Math.max(huntConfig.hints - (hintsGiven - 1), 1);
 
-            addServerPoints(guildId, channelId, serverPoints);
-            threadsFile.serverPointsAwardedForSet.push(String(setNumber));
+            addChannelPoints(guildId, channelId, channelPoints);
+            threadsFile.channelPointsAwardedForSet.push(String(setNumber));
 
-            serverPointsMessage = `Server earned ${serverPoints} points for this set. (Found with ${hintsGiven} hints given)`;
+            channelPointsMessage = `Channel earned ${channelPoints} points for this set. (Found with ${hintsGiven} hints given)`;
         } else {
-            serverPointsMessage = `Server already earned points for this set.`;
+            channelPointsMessage = `Channel already earned points for this set.`;
         }
 
         threadsFile.submissions[setNumber].push(userId);
@@ -89,6 +89,6 @@ module.exports = {
         });
 
         const displayName = interaction.member.displayName;
-        await thread.send(`${displayName} earned ${userPoints.toFixed(1)} points for themselves.\n${serverPointsMessage}`);
+        await thread.send(`${displayName} earned ${userPoints.toFixed(1)} points for themselves.\n${channelPointsMessage}`);
     },
 };

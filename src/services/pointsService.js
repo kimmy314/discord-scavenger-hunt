@@ -5,8 +5,8 @@ function getPointsFilePath() {
     return path.join(__dirname, '../../data', 'points.json');
 }
 
-function getServerFilePath() {
-    return path.join(__dirname, '../../data', 'server.json');
+function getChannelFilePath() {
+    return path.join(__dirname, '../../data', 'channel.json');
 }
 
 function loadPoints() {
@@ -19,18 +19,18 @@ function savePoints(points) {
     fs.writeFileSync(filePath, JSON.stringify(points, null, 4));
 }
 
-function loadServerScores() {
-    const filePath = getServerFilePath();
+function loadChannelScores() {
+    const filePath = getChannelFilePath();
     return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath)) : {};
 }
 
-function saveServerScores(servers) {
-    const filePath = getServerFilePath();
-    fs.writeFileSync(filePath, JSON.stringify(servers, null, 4));
+function saveChannelScores(channels) {
+    const filePath = getChannelFilePath();
+    fs.writeFileSync(filePath, JSON.stringify(channels, null, 4));
 }
 
 const pointsData = loadPoints();
-const serverData = loadServerScores();
+const channelData = loadChannelScores();
 
 function addUserPoints(guildId, userId, pointsToAdd) {
     if (!pointsData[guildId]) pointsData[guildId] = {};
@@ -44,17 +44,17 @@ function getUserPoints(guildId, userId) {
     return pointsData[guildId]?.[userId] || 0;
 }
 
-function addServerPoints(guildId, channelId, pointsToAdd) {
+function addChannelPoints(guildId, channelId, pointsToAdd) {
     const key = `${guildId}-${channelId}`;
-    if (!serverData[key]) serverData[key] = { score: 0 };
+    if (!channelData[key]) channelData[key] = { score: 0 };
 
-    serverData[key].score += pointsToAdd;
-    saveServerScores(serverData);
+    channelData[key].score += pointsToAdd;
+    saveChannelScores(channelData);
 }
 
-function getServerPoints(guildId, channelId) {
+function getChannelPoints(guildId, channelId) {
     const key = `${guildId}-${channelId}`;
-    return serverData[key]?.score || 0;
+    return channelData[key]?.score || 0;
 }
 
 function getAllUserPoints(guildId) {
@@ -64,7 +64,7 @@ function getAllUserPoints(guildId) {
 module.exports = {
     addUserPoints,
     getUserPoints,
-    addServerPoints,
-    getServerPoints,
+    addChannelPoints,
+    getChannelPoints,
     getAllUserPoints,
 };
