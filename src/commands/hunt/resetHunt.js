@@ -18,24 +18,30 @@ module.exports = {
         const channelId = interaction.channel.id;
         const guildId = interaction.guild.id;
 
+        // Remove hunt config for this channel
         resetHunt(channelId);
 
+        // Remove threads and submissions related to this channel
         const threadsPath = path.join(__dirname, '../../data', `${guildId}-threads.json`);
-        if (fs.existsSync(threadsPath)) {
-            const data = JSON.parse(fs.readFileSync(threadsPath));
+        let data = { threads: [], submissions: {}, channelPointsAwardedForSet: {} };
 
-            // Remove threads from this channel
+        if (fs.existsSync(threadsPath)) {
+            data = JSON.parse(fs.readFileSync(threadsPath));
+
             if (data.threads) {
                 data.threads = data.threads.filter(t => t.channelId !== channelId);
             }
 
-            // Remove submissions for this channel
             if (data.submissions) {
                 delete data.submissions[channelId];
             }
 
-            fs.writeFileSync(threadsPath, JSON.stringify(data, null, 4));
+            if (data.channelPointsAwardedForSet) {
+                delete data.channelPointsAwardedForSet[channelId];
+            }
         }
+
+        await saveHuntThreads(guildId, data);
 
         await interaction.reply({
             content: 'Hunt data for this channel has been reset.',
