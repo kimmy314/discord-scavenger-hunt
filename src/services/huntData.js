@@ -69,4 +69,5 @@ module.exports = {
     createHunt,
     getHunt,
     resetHunt,
+    loadHunts
 };

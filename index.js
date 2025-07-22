@@ -2,7 +2,7 @@ const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const config = require('./config.json');
-const { loadHuntThreads, getHunt } = require('./src/services/huntData');
+const { loadHunts, loadHuntThreads } = require('./src/services/huntData');
 const { getPublicSheetData, extractSpreadsheetIdFromUrl } = require('./src/services/googleSheetsService');
 const { scheduleHintsForThread } = require('./src/services/scheduler');
 
@@ -24,7 +24,7 @@ for (const folder of commandFolders) {
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}`);
 
-    const hunts = require('./data/hunts.json');
+    const hunts = loadHunts();
 
     for (const [channelId, huntConfig] of Object.entries(hunts)) {
         try {
