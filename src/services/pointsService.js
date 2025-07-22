@@ -32,16 +32,17 @@ function saveChannelScores(channels) {
 const pointsData = loadPoints();
 const channelData = loadChannelScores();
 
-function addUserPoints(guildId, userId, pointsToAdd) {
+function addUserPoints(guildId, channelId, userId, pointsToAdd) {
     if (!pointsData[guildId]) pointsData[guildId] = {};
-    if (!pointsData[guildId][userId]) pointsData[guildId][userId] = 0;
+    if (!pointsData[guildId][channelId]) pointsData[guildId][channelId] = {};
+    if (!pointsData[guildId][channelId][userId]) pointsData[guildId][channelId][userId] = 0;
 
-    pointsData[guildId][userId] += pointsToAdd;
+    pointsData[guildId][channelId][userId] += pointsToAdd;
     savePoints(pointsData);
 }
 
-function getUserPoints(guildId, userId) {
-    return pointsData[guildId]?.[userId] || 0;
+function getUserPoints(guildId, channelId, userId) {
+    return pointsData[guildId]?.[channelId]?.[userId] || 0;
 }
 
 function addChannelPoints(guildId, channelId, pointsToAdd) {
@@ -57,8 +58,8 @@ function getChannelPoints(guildId, channelId) {
     return channelData[key]?.score || 0;
 }
 
-function getAllUserPoints(guildId) {
-    return pointsData[guildId] || {};
+function getAllUserPoints(guildId, channelId) {
+    return pointsData[guildId]?.[channelId] || {};
 }
 
 module.exports = {

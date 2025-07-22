@@ -34,7 +34,7 @@ module.exports = {
         const userId = interaction.user.id;
         const setNumber = interaction.options.getInteger('set');
         const kayaIdInput = interaction.options.getString('kaya_id');
-        const kayaId = extractKayaId(kayaIdInput);
+        const kayaId = String(extractKayaId(kayaIdInput)).trim();
 
         const huntConfig = getHunt(channelId);
         if (!huntConfig) {
@@ -46,45 +46,60 @@ module.exports = {
             return interaction.reply({ content: 'Hunt threads data missing.', ephemeral: true });
         }
 
-        const foundThreadData = threadsFile.threads.find(t => t.set == setNumber && t.kayaId == kayaId);
+        const foundThreadData = threadsFile.threads.find(
+            t => t.set == setNumber && String(t.kayaId).trim() === kayaId && t.channelId === channelId
+        );
+
         if (!foundThreadData) {
             return interaction.reply({ content: 'Invalid set number or Kaya ID for this hunt.', ephemeral: true });
         }
 
         const thread = await interaction.guild.channels.fetch(foundThreadData.threadId);
-        if (!threadsFile.submissions[setNumber]) {
-            threadsFile.submissions[setNumber] = [];
+        if (!threadsFile.submissions[channelId]) {
+            threadsFile.submissions[channelId] = {};
         }
 
-        if (threadsFile.submissions[setNumber].includes(userId)) {
-            return interaction.reply({ content: `You've already submitted a find for set ${setNumber}.`, ephemeral: true });
+        if (!threadsFile.submissions[channelId][setNumber]) {
+            threadsFile.submissions[channelId][setNumber] = [];
         }
 
-        const countForThisSet = threadsFile.submissions[setNumber].length;
+        if (threadsFile.submissions[channelId][setNumber].includes(userId)) {
+            return interaction.reply({
+                content: `You've already submitted a find for set ${setNumber} in this channel.`,
+                ephemeral: true,
+            });
+        }
+
+        const countForThisSet = threadsFile.submissions[channelId][setNumber].length;
         const userPoints = Math.max(3 - countForThisSet * 0.1, 1);
-        addUserPoints(guildId, userId, userPoints);
+        addUserPoints(guildId, channelId, userId, userPoints);
 
         let channelPoints = 0;
         let channelPointsMessage = '';
 
-        if (!threadsFile.channelPointsAwardedForSet.includes(String(setNumber))) {
-            const relatedThreads = threadsFile.threads.filter(t => t.set == setNumber);
+        if (!threadsFile.channelPointsAwardedForSet[channelId]) {
+            threadsFile.channelPointsAwardedForSet[channelId] = [];
+        }
+        if (!threadsFile.channelPointsAwardedForSet[channelId].includes(String(setNumber))) {
+            const relatedThreads = threadsFile.threads.filter(
+                t => t.set == setNumber && t.channelId === channelId
+            );
             const hintsGiven = Math.max(...relatedThreads.map(t => t.hintsGiven || 0));
             channelPoints = Math.max(huntConfig.hints - (hintsGiven - 1), 1);
 
             addChannelPoints(guildId, channelId, channelPoints);
-            threadsFile.channelPointsAwardedForSet.push(String(setNumber));
+            threadsFile.channelPointsAwardedForSet[channelId].push(String(setNumber));
 
             channelPointsMessage = `Channel earned ${channelPoints} points for this set. (Found with ${hintsGiven} hints given)`;
         } else {
             channelPointsMessage = `Channel already earned points for this set.`;
         }
 
-        threadsFile.submissions[setNumber].push(userId);
+        threadsFile.submissions[channelId][setNumber].push(userId);
         await saveHuntThreads(guildId, threadsFile);
 
         await interaction.reply({
-            content: `✅ Found recorded! You earned ${userPoints} points.\nTotal: ${getUserPoints(guildId, userId)} points.`,
+            content: `✅ Found recorded! You earned ${userPoints} points.\nTotal: ${getUserPoints(guildId, channelId, userId)} points.`,
             ephemeral: true,
         });
 

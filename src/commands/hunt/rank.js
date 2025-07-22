@@ -13,7 +13,7 @@ module.exports = {
         // If running inside a thread, use parentId for points lookup
         const channelId = interaction.channel.isThread() ? interaction.channel.parentId : interaction.channel.id;
 
-        const userPoints = getAllUserPoints(guildId);
+        const userPoints = getAllUserPoints(guildId, channelId);
 
         if (!userPoints || Object.keys(userPoints).length === 0) {
             return interaction.reply('No points recorded yet.');

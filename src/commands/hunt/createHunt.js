@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getPublicSheetData, extractSpreadsheetIdFromUrl } = require('../../services/googleSheetsService');
-const { createHunt, saveHuntThreads } = require('../../services/huntData');
+const { createHunt, saveHuntThreads, loadHuntThreads, getHunt } = require('../../services/huntData');
 const { scheduleHintsForThread } = require('../../services/scheduler');
 const { DateTime } = require('luxon');
 
@@ -50,16 +50,12 @@ module.exports = {
                 goal,
             });
 
-            const guildHuntData = {
-                threads: [],
-                submissions: {},
-                channelPointsAwardedForSet: [],
-            };
+            const existingThreads = await loadHuntThreads(interaction.guild.id);
 
             for (const row of sheetData) {
                 const set = row['Set #'];
                 const gym = row['Gym'];
-                const kayaId = row['Kaya Id'];
+                const kayaId = String(row['Kaya Id']).trim();
                 const startDate = row['Start Date'];
 
                 const startDateTime = DateTime.fromFormat(startDate.trim(), 'M/d/yyyy HH:mm:ss', { zone: 'America/Los_Angeles' });
@@ -68,7 +64,7 @@ module.exports = {
                 const threadName = `Set: ${set} - ${gym}`;
                 const thread = await interaction.channel.threads.create({
                     name: threadName,
-                    autoArchiveDuration: 1440,
+                    autoArchiveDuration: 10080,
                     reason: 'Scavenger hunt thread',
                 });
 
@@ -84,8 +80,9 @@ module.exports = {
                     getSheetData: (id) => getPublicSheetData(id),
                 });
 
-                guildHuntData.threads.push({
+                existingThreads.threads.push({
                     threadId: thread.id,
+                    channelId: interaction.channel.id,
                     set,
                     gym,
                     kayaId,
@@ -94,7 +91,7 @@ module.exports = {
                 });
             }
 
-            await saveHuntThreads(interaction.guild.id, guildHuntData);
+            await saveHuntThreads(interaction.guild.id, existingThreads);
 
             await interaction.editReply(`Hunt created. Threads created. Hints every ${seconds} seconds. Channel goal: ${goal} points.`);
         } catch (error) {

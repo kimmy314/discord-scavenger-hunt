@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { resetHunt, saveHuntThreads } = require('../../services/huntData');
+const { resetHunt, saveHuntThreads, loadHuntThreads } = require('../../services/huntData');
 const fs = require('fs');
 const path = require('path');
 
@@ -22,7 +22,19 @@ module.exports = {
 
         const threadsPath = path.join(__dirname, '../../data', `${guildId}-threads.json`);
         if (fs.existsSync(threadsPath)) {
-            fs.unlinkSync(threadsPath);
+            const data = JSON.parse(fs.readFileSync(threadsPath));
+
+            // Remove threads from this channel
+            if (data.threads) {
+                data.threads = data.threads.filter(t => t.channelId !== channelId);
+            }
+
+            // Remove submissions for this channel
+            if (data.submissions) {
+                delete data.submissions[channelId];
+            }
+
+            fs.writeFileSync(threadsPath, JSON.stringify(data, null, 4));
         }
 
         await interaction.reply({

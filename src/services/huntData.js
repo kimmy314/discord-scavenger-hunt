@@ -27,19 +27,19 @@ function saveHunts(state) {
     fs.writeFileSync(filePath, JSON.stringify(state, null, 4));
 }
 
-ensureHuntFileExists();
-const hunts = loadHunts();
-
 function createHunt(channelId, huntConfig) {
+    const hunts = loadHunts();
     hunts[channelId] = { ...huntConfig, createdAt: new Date().toISOString() };
     saveHunts(hunts);
 }
 
 function getHunt(channelId) {
+    const hunts = loadHunts();
     return hunts[channelId];
 }
 
 function resetHunt(channelId) {
+    const hunts = loadHunts();
     delete hunts[channelId];
     saveHunts(hunts);
 }
